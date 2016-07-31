@@ -15,6 +15,8 @@ class GithubAPIClient {
    typealias GitRepositoryResponse = (data: [[String: AnyObject]]?, error: NSError?)
    typealias GitRepositoryStarredResponse = (status: Bool?, error: NSError?)
    
+   static let starredAPIString = "\(GitHutWebPaths.gitHubAddress)" + "\(GitHutWebPaths.gitHubStarred)"
+   
    class func getRepositoriesWithCompletion(completion: GitRepositoryResponse -> Void) {
       let repoAPIString = "\(GitHutWebPaths.gitHubAddress)" + "repositories"
       Alamofire.request(.GET, repoAPIString, parameters: APIKeys.twitterLoginCredentals).responseJSON { response in
@@ -27,71 +29,47 @@ class GithubAPIClient {
    }
    
    class func checkIfRepositoryIsStarred(fullName: String, completion: GitRepositoryStarredResponse -> Void) {
-      let starredAPIString = "\(GitHutWebPaths.gitHubAddress)" + "\(GitHutWebPaths.gitHubStarred)" + "\(fullName)"
       
-      Alamofire.request(.GET, starredAPIString, parameters: APIKeys.twitterLoginCredentals, headers: APIKeys.headerAccessToken).responseJSON { response in
-         if response.response?.statusCode == 404 {
-            completion((false, response.result.error))
-         } else if response.response?.statusCode == 204 {
-            completion((true, response.result.error))
-         } else {
-            completion((nil, response.result.error))
+      Alamofire.request(.GET, starredAPIString + "\(fullName)", parameters: APIKeys.twitterLoginCredentals, headers: APIKeys.headerAccessToken).responseJSON { response in
+         
+         if let serverResponse = response.response {
+            switch serverResponse.statusCode {
+            case 404:
+               completion((false, response.result.error))
+            case 204:
+               completion((true, response.result.error))
+            default:
+               completion((nil, response.result.error))
+            }
          }
       }
    }
    
    
-   class func starRepository(fullName: String, completion: () -> Void) {
-      let urlString = "\(GitHutWebPaths.gitHubAddress)" + "\(GitHutWebPaths.gitHubStarred)" + "\(fullName)"
-      
-      guard let repoStarredURL = NSURL(string: urlString) else {
-         return
+   class func starRepository(fullName: String, completion: GitRepositoryStarredResponse -> Void) {
+      Alamofire.request(.PUT, starredAPIString + "\(fullName)", parameters: APIKeys.twitterLoginCredentals, headers: APIKeys.headerAccessToken).responseJSON { response in
+         if let serverResponse = response.response {
+            switch serverResponse.statusCode {
+            case 204:
+               completion((true, response.result.error))
+            default:
+               completion((nil,response.result.error))
+            }
+         }
       }
-      
-      let request = NSMutableURLRequest(URL: repoStarredURL)
-      request.HTTPMethod = "PUT"
-      request.addValue("\(APIKeys.headerAccessToken)", forHTTPHeaderField: "Authorization")
-      
-      let urlSession = NSURLSession.sharedSession()
-      urlSession.dataTaskWithRequest(request) { _, response, _ in
-         guard let httpResponse = response as? NSHTTPURLResponse else {
-            return
-         }
-         
-         if httpResponse.statusCode == 204 {
-            completion()
-         } else {
-            print("Other status code \(httpResponse.statusCode)")
-         }
-         
-         }.resume()
    }
    
-   class func unStarRepository(fullName: String, completion: () -> Void) {
-      let urlString = "\(GitHutWebPaths.gitHubAddress)" + "\(GitHutWebPaths.gitHubStarred)" + "\(fullName)"
-      
-      guard let repoStarredURL = NSURL(string: urlString) else {
-         return
+   class func unStarRepository(fullName: String, completion: GitRepositoryStarredResponse -> Void) {
+      Alamofire.request(.DELETE, starredAPIString + "\(fullName)", parameters: APIKeys.twitterLoginCredentals, headers: APIKeys.headerAccessToken).responseJSON { response in
+         if let serverResponse = response.response {
+            switch serverResponse.statusCode {
+            case 204:
+               completion((true, response.result.error))
+            default:
+               completion((nil,response.result.error))
+            }
+         }
       }
-      
-      let request = NSMutableURLRequest(URL: repoStarredURL)
-      request.HTTPMethod = "DELETE"
-      request.addValue("\(APIKeys.headerAccessToken)", forHTTPHeaderField: "Authorization")
-      
-      let urlSession = NSURLSession.sharedSession()
-      urlSession.dataTaskWithRequest(request) { _, response, _ in
-         guard let httpResponse = response as? NSHTTPURLResponse else {
-            return
-         }
-         
-         if httpResponse.statusCode == 204 {
-            completion()
-         } else {
-            print("Other status code \(httpResponse.statusCode)")
-         }
-         
-         }.resume()
-      
    }
 }
 

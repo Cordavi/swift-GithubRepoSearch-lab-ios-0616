@@ -38,12 +38,12 @@ class ReposDataStore {
          }
          
          if starredStatusResponse {
-            GithubAPIClient.unStarRepository(repository.fullName, completion: {
+            GithubAPIClient.unStarRepository(repository.fullName, completion: { unStarringResponse in
                completion(false)
                }
             )
          } else if !starredStatusResponse {
-            GithubAPIClient.starRepository(repository.fullName, completion: {
+            GithubAPIClient.starRepository(repository.fullName, completion: { starringResponse in
                completion(true)
                }
             )
