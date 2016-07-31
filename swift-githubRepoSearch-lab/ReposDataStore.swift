@@ -31,13 +31,18 @@ class ReposDataStore {
    }
    
    func toggleStarStatusForRepository(repository: GithubRepository, completion: Bool -> Void) {
-      GithubAPIClient.checkIfRepositoryIsStarred(repository.fullName) { response in
-         if response {
+      GithubAPIClient.checkIfRepositoryIsStarred(repository.fullName) { responseStatus in
+         
+         guard let starredStatusResponse = responseStatus.status where responseStatus.error == nil else {
+            return
+         }
+         
+         if starredStatusResponse {
             GithubAPIClient.unStarRepository(repository.fullName, completion: {
                completion(false)
                }
             )
-         } else if !response {
+         } else if !starredStatusResponse {
             GithubAPIClient.starRepository(repository.fullName, completion: {
                completion(true)
                }

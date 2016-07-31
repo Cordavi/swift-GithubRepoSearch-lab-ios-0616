@@ -13,12 +13,11 @@ import SwiftyJSON
 class GithubAPIClient {
    
    typealias GitRepositoryResponse = (data: [[String: AnyObject]]?, error: NSError?)
+   typealias GitRepositoryStarredResponse = (status: Bool?, error: NSError?)
    
    class func getRepositoriesWithCompletion(completion: GitRepositoryResponse -> Void) {
-      let urlString = "\(GitHutWebPaths.gitHubAddress)" + "repositories" + "\(APIKeys.clientID)" + "\(APIKeys.clientSecret)"
-      
-      Alamofire.request(.GET, urlString).responseJSON { response in
-         
+      let repoAPIString = "\(GitHutWebPaths.gitHubAddress)" + "repositories"
+      Alamofire.request(.GET, repoAPIString, parameters: APIKeys.twitterLoginCredentals).responseJSON { response in
          if let data = response.data {
             completion((JSON(data: data).arrayObject as? [[String: AnyObject]], response.result.error))
          } else {
@@ -27,33 +26,20 @@ class GithubAPIClient {
       }
    }
    
-   class func checkIfRepositoryIsStarred(fullName: String, completion: Bool -> Void) {
-      let urlString = "\(GitHutWebPaths.gitHubAddress)" + "\(GitHutWebPaths.gitHubStarred)" + "\(fullName)"
+   class func checkIfRepositoryIsStarred(fullName: String, completion: GitRepositoryStarredResponse -> Void) {
+      let starredAPIString = "\(GitHutWebPaths.gitHubAddress)" + "\(GitHutWebPaths.gitHubStarred)" + "\(fullName)"
       
-      guard let repoStarredURL = NSURL(string: urlString) else {
-         return
-      }
-      
-      let request = NSMutableURLRequest(URL: repoStarredURL)
-      request.HTTPMethod = "GET"
-      request.addValue("\(APIKeys.headerAccessToken)", forHTTPHeaderField: "Authorization")
-      
-      let urlSession = NSURLSession.sharedSession()
-      urlSession.dataTaskWithRequest(request) { _, response, _ in
-         guard let httpResponse = response as? NSHTTPURLResponse else {
-            return
-         }
-         
-         if httpResponse.statusCode == 404 {
-            completion(false)
-         } else if httpResponse.statusCode == 204 {
-            completion(true)
+      Alamofire.request(.GET, starredAPIString, parameters: APIKeys.twitterLoginCredentals, headers: APIKeys.headerAccessToken).responseJSON { response in
+         if response.response?.statusCode == 404 {
+            completion((false, response.result.error))
+         } else if response.response?.statusCode == 204 {
+            completion((true, response.result.error))
          } else {
-            print("Other status code \(httpResponse.statusCode)")
+            completion((nil, response.result.error))
          }
-         
-         }.resume()
+      }
    }
+   
    
    class func starRepository(fullName: String, completion: () -> Void) {
       let urlString = "\(GitHutWebPaths.gitHubAddress)" + "\(GitHutWebPaths.gitHubStarred)" + "\(fullName)"
