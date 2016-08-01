@@ -7,6 +7,7 @@
 //
 
 import UIKit
+import SwiftyJSON
 
 class ReposTableViewController: UITableViewController {
    let dataStore = ReposDataStore.sharedInstance
@@ -16,6 +17,12 @@ class ReposTableViewController: UITableViewController {
       
       self.tableView.accessibilityLabel = "tableView"
       self.tableView.delegate = self
+      
+      GithubAPIClient.searchRepositories("Swift") { repsonse in
+         for dictItem in repsonse.data! {
+            print(dictItem["html_url"])
+         }
+      }
       
       dataStore.getRepositoriesWithCompletion {
          dispatch_async(dispatch_get_main_queue()) {

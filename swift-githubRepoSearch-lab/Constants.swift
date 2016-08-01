@@ -8,7 +8,8 @@
 
 import Foundation
 
-struct GitHutWebPaths {
+struct GitHubWebPaths {
    static let gitHubAddress = "https://api.github.com/"
    static let gitHubStarred = "user/starred/"
+   static let gitHubSearch = "search/repositories?q="
 }

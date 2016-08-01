@@ -14,11 +14,14 @@ class GithubAPIClient {
    
    typealias GitRepositoryResponse = (data: [[String: AnyObject]]?, error: NSError?)
    typealias GitRepositoryStarredResponse = (status: Bool?, error: NSError?)
+   typealias GitRepositorySearch = (data: [String: AnyObject]?, error: NSError?)
    
-   static let starredAPIString = "\(GitHutWebPaths.gitHubAddress)" + "\(GitHutWebPaths.gitHubStarred)"
+   static let starredAPIString = "\(GitHubWebPaths.gitHubAddress)" + "\(GitHubWebPaths.gitHubStarred)"
+   static let searchAPIString = "\(GitHubWebPaths.gitHubAddress)" + "\(GitHubWebPaths.gitHubSearch)"
+   
    
    class func getRepositoriesWithCompletion(completion: GitRepositoryResponse -> Void) {
-      let repoAPIString = "\(GitHutWebPaths.gitHubAddress)" + "repositories"
+      let repoAPIString = "\(GitHubWebPaths.gitHubAddress)" + "repositories"
       Alamofire.request(.GET, repoAPIString, parameters: APIKeys.twitterLoginCredentals).responseJSON { response in
          if let data = response.data {
             completion((JSON(data: data).arrayObject as? [[String: AnyObject]], response.result.error))
@@ -53,7 +56,7 @@ class GithubAPIClient {
             case 204:
                completion((true, response.result.error))
             default:
-               completion((nil,response.result.error))
+               completion((nil, response.result.error))
             }
          }
       }
@@ -66,12 +69,27 @@ class GithubAPIClient {
             case 204:
                completion((true, response.result.error))
             default:
-               completion((nil,response.result.error))
+               completion((nil, response.result.error))
             }
          }
       }
    }
+   
+   class func searchRepositories(searchTerm: String, completion: GitRepositoryResponse -> Void) {
+      Alamofire.request(.GET, searchAPIString + "\(searchTerm)", parameters: APIKeys.twitterLoginCredentals, headers: APIKeys.headerAccessToken).responseJSON { response in
+         if let data = response.data {
+            if let searchData = JSON(data: data).dictionaryObject {
+               if let searchRepos = searchData["items"] {
+                  completion((JSON(searchRepos).arrayObject as? [[String: AnyObject]], response.result.error))
+               }
+            }
+         } else {
+            completion((nil, response.result.error))
+         }
+      }
+   }
 }
+
 
 
 
