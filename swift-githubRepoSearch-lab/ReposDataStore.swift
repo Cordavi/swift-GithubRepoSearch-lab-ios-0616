@@ -53,7 +53,19 @@ class ReposDataStore {
       }
    }
    
-   func getRepositoriesWithSearch(completion: ()-> Void) {
-      
+   func getRepositoriesWithSearch(searchTerm: String, completion: () -> Void) {
+      GithubAPIClient.searchRepositories(searchTerm) { responseData in
+         guard let searchRepositoryDictionary = responseData.data where responseData.error == nil else {
+            return
+         }
+         
+         ReposDataStore.sharedInstance.repositories.removeAll()
+         
+         for searchRepository in searchRepositoryDictionary {
+            self.repositories.append(GithubRepository(dictionary: searchRepository))
+         }
+         
+         completion()
+      }
    }
 }
