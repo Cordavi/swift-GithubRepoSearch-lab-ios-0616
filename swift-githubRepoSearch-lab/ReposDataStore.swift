@@ -52,4 +52,8 @@ class ReposDataStore {
          }
       }
    }
+   
+   func getRepositoriesWithSearch(completion: ()-> Void) {
+      
+   }
 }

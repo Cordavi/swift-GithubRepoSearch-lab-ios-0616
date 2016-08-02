@@ -14,7 +14,6 @@ class GithubAPIClient {
    
    typealias GitRepositoryResponse = (data: [[String: AnyObject]]?, error: NSError?)
    typealias GitRepositoryStarredResponse = (status: Bool?, error: NSError?)
-   typealias GitRepositorySearch = (data: [String: AnyObject]?, error: NSError?)
    
    static let starredAPIString = "\(GitHubWebPaths.gitHubAddress)" + "\(GitHubWebPaths.gitHubStarred)"
    static let searchAPIString = "\(GitHubWebPaths.gitHubAddress)" + "\(GitHubWebPaths.gitHubSearch)"

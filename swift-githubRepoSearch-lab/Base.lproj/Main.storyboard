@@ -31,7 +31,7 @@
                     <navigationItem key="navigationItem" id="5ye-1I-THq">
                         <barButtonItem key="rightBarButtonItem" systemItem="search" id="AA7-QO-LKN">
                             <connections>
-                                <action selector="searchButtonTapped:" destination="khO-Vc-Rne" id="uFY-Ow-0a7"/>
+                                <action selector="searchButtonTapped:" destination="khO-Vc-Rne" id="UEa-fn-pLL"/>
                             </connections>
                         </barButtonItem>
                     </navigationItem>
